@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rocketseat.planner.trip.participant.ParticipantRequestPayload;
-import com.rocketseat.planner.trip.participant.ParticipantService;
+import com.rocketseat.planner.participant.ParticipantCreateResponse;
+import com.rocketseat.planner.participant.ParticipantRequestPayload;
+import com.rocketseat.planner.participant.ParticipantService;
 
 @RestController
 @RequestMapping("/trips")
@@ -80,14 +81,14 @@ public class TripController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<TripCreateResponse> createTrip(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload ,@RequestBody TripRequestPayload tripRequestPayload) {
+    public ResponseEntity<ParticipantCreateResponse> createTrip(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload ,@RequestBody TripRequestPayload tripRequestPayload) {
         Optional<Trip> trip = this.tripRepository.findById(id);
         if (trip.isPresent()) {
             Trip rawTrip = trip.get();
             List<String> participantToInvite = new ArrayList<>();
             participantToInvite.add(payload.email());
 
-            this.participantService.registerParticipantsToEvent(participantToInvite, rawTrip);
+            ParticipantCreateResponse participantCreateResponse = this.participantService.registerParticipantToEvent(payload.email(), rawTrip);
            
             if(rawTrip.isConfirmed()) this.participantService.triggerConfirmationEmailToParticipants(id);
         }
